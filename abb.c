@@ -127,3 +127,12 @@ bool abb_pertenece(const abb_t *arbol, const char *clave){
     }
     return false;
 }
+
+
+void *abb_obtener(const abb_t *arbol, const char *clave){
+    nodo_t* obtenido = devuelve_nodo(arbol,clave);
+    if( obtenido != NULL)){
+        return obtenido->valor;
+    }
+    return NULL;
+}
