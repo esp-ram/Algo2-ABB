@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
 
 typedef struct nodo{
     char* clave;
@@ -5,7 +10,6 @@ typedef struct nodo{
     nodo_t* hijo_izq;
     nodo_t* hijo_der;
 }nodo_t;
-
 
 
 typedef struct abb{
@@ -17,7 +21,6 @@ typedef struct abb{
 
 
 nodo_t* nodo_crear(char*clave, void* valor){
-
     nodo_t* nodo_nuevo = malloc(sizeof(nodo_t));
     if (nodo_nuevo == NULL){
         return NULL;
@@ -28,6 +31,7 @@ nodo_t* nodo_crear(char*clave, void* valor){
         free(nodo_nuevo);
         return NULL;
     }
+
     strcpy(copiar_clave,clave);
     nodo_nuevo->valor = valor;
     nodo_nuevo->clave = copiar_clave;
