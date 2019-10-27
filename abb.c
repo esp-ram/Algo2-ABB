@@ -62,6 +62,14 @@ nodo_t* nodo_crear(char*clave, void* valor){
 }
 
 
+nodo_t* devuelve_nodo(const abb_t *arbol, const char *clave){
+    nodo_t* resultado = comparacion_rec(arbol->raiz,clave,NULL);
+    if (resultado != NULL && arbol->comparar_clave(resultado,clave) == 0){
+        return resultado;
+    }
+    return NULL;
+}
+
 ////////////////PRIMITIVAS
 
 abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
@@ -110,4 +118,12 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
 
 size_t abb_cantidad(abb_t *arbol){
     return arbol->cantidad;
+}
+
+
+bool abb_pertenece(const abb_t *arbol, const char *clave){
+    if(devuelve_nodo(arbol,clave)){
+        return true;
+    }
+    return false;
 }
