@@ -106,3 +106,8 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
     }
     return true;
 }
+
+
+size_t abb_cantidad(abb_t *arbol){
+    return arbol->cantidad;
+}
