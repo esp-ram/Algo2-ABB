@@ -19,7 +19,7 @@ typedef struct abb{
     abb_destruir_dato_t destruir_dato;
 }abb_t;
 
-
+enum Tipo {Derecho,Izquierdo};
 
 /////////////AUXILIARES
 
@@ -70,6 +70,19 @@ nodo_t* devuelve_nodo(const abb_t *arbol, const char *clave){
     return NULL;
 }
 
+
+nodo_t* encontrar_padre(nodo_t* inicial, const char* clave, nodo_t* padre){
+    int resultado = arbol->comparar_clave(inicial->clave,clave);
+    if (resultado == 0){
+        return padre;
+    }else if(resultado < 0){
+        return encontrar_padre(inicial->hijo_izq,clave,inicial);
+    }else{
+        return encontrar_padre(inicial->hijo_der,clave,inicial);
+    }
+}
+
+
 ////////////////PRIMITIVAS
 
 abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
@@ -90,22 +103,28 @@ abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
 
 bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
     nodo_t* padre = comparacion_rec(arbol->raiz,clave,NULL);
+    if(padre == NULL){
+        nodo_t* nodo_nuevo = nodo_crear(clave,dato);
+        if(nodo_nuevo == NULL){
+            return false;
+        }
+        arbol->raiz = nodo_nuevo;
+        arbol->cantidad += 1;
+        return true;
+    }
     int comparacion_padre = arbol->comparar_clave(padre->clave,clave);
-    if (padre != NULL && comparacion_padre == 0){
+    if (comparacion_padre == 0){
         void* auxiliar = padre->valor;
         padre->valor = dato;
         if(arbol->destruir_dato){
             arbol->destruir_dato(auxiliar);
         }
     }else{
-        nodo_t* nodo_nuevo = nodo_crear(clave,valor);
+        nodo_t* nodo_nuevo = nodo_crear(clave,dato);
         if(nodo_nuevo == NULL){
             return false;
         }
-
-        if (padre == NULL) {
-            arbol->raiz = nodo_nuevo;
-        } else if (comparacion_padre < 1) {
+        if (comparacion_padre < 1) {
             padre->hijo_izq = nodo_nuevo;
         } else {
             padre->hijo_der = nodo_nuevo;
@@ -131,8 +150,89 @@ bool abb_pertenece(const abb_t *arbol, const char *clave){
 
 void *abb_obtener(const abb_t *arbol, const char *clave){
     nodo_t* obtenido = devuelve_nodo(arbol,clave);
-    if( obtenido != NULL)){
+    if(obtenido != NULL){
         return obtenido->valor;
     }
     return NULL;
+}
+
+
+void *abb_borrar(abb_t *arbol, const char *clave){
+    if(arbol->raiz == NULL){
+        return NULL;
+    }
+    nodo_t* busqueda = abb_obtener(arbol,clave);
+    if(busqueda == NULL){
+        return NULL;
+    }
+    void* dato_devolver = busqueda->valor;
+    if(busqueda->hijo_der && busqueda->hijo_izq){
+        borrar_completo(arbol, busqueda);
+    }else if (busqueda->hijo_der || !busqueda->hijo_izq){
+        borrar_con_hijo(arbol, busqueda);
+    }else{
+        borrar_sin_hijos(arbol, busqueda);
+    }
+    arbol->cantidad -= 1;
+    return dato_devolver;
+}
+
+void borrar_completo(nodo_t* borrado){
+    nodo_t* padre = encontrar_padre(borrado,borrado->clave,NULL);
+    // TODO: encontrar el reemplazante mas izquierdo de los derechos
+}
+
+
+bool borrar_con_hijo(abb_t* arbol; nodo_t* borrado){
+    nodo_t* padre = encontrar_padre(borrado,borrado->clave,NULL);
+    if(padre == NULL){// es raiz
+        if(!borrado->hijo_izq){
+            arbol->raiz = borrado->hijo_der;
+        }else{
+            arbol->raiz = borrado->hijo_izq;
+        }
+        return true;
+    }
+    enum Tipo es_hijo;
+    if(arbol->comparar_clave(padre->clave,borrado->clave) < 0){
+        es_hijo = Derecho;
+    }else{
+        es_hijo = Izquierdo;
+    }
+    if(!borrado->hijo_izq){
+        if(es_hijo = Derecho){
+            padre->hijo_der = borrado->hijo_der;
+        }else{
+            padre->hijo_izq = borrado->hijo_der;
+        }
+    }else{
+        if(es_hijo = Derecho){
+            padre->hijo_der = borrado->hijo_izq;
+        }else{
+            padre->hijo_izq = borrado->hijo_izq;
+        }
+    }
+    free(borrado->clave);
+    free(borrado);
+    return true;
+}
+
+
+bool borrar_sin_hijos(abb_t* arbol; nodo_t* borrado){
+    nodo_t* padre = encontrar_padre(borrado,borrado->clave,NULL);
+    if(padre == NULL){// es raiz
+        arbol->raiz = NULL;
+        return true;
+    }
+    enum Tipo es_hijo;
+    if(arbol->comparar_clave(padre->clave,borrado->clave) < 0){
+        es_hijo = Derecho;
+    }else{
+        es_hijo = Izquierdo;
+    }
+    if(es_hijo = Derecho){
+        padre->hijo_der = NULL;
+    }else{
+        padre->hijo_izq = NULL;
+    }
 }
