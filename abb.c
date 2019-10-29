@@ -83,6 +83,27 @@ nodo_t* encontrar_padre(nodo_t* inicial, const char* clave, nodo_t* padre){
 }
 
 
+nodo_t* buscar_reemplazo(nodo_t* nodo){
+    if(!nodo){
+        return NULL;
+    }
+    if(nodo->hijo_izq){
+        return buscar_reemplazo(nodo->hijo_izq);
+    }
+    return nodo;
+}
+
+
+void destruccion_rec(nodo_t* nodo, void destr_dato(void*)){
+    if(!nodo){
+        return NULL;
+    }
+    destruccion_rec(nodo->der);
+    destruccion_rec(nodo->izq);
+    free(nodo->clave);
+    destr_dato(nodo->valor);
+    free(nodo);
+}
 ////////////////PRIMITIVAS
 
 abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
@@ -157,29 +178,15 @@ void *abb_obtener(const abb_t *arbol, const char *clave){
 }
 
 
-void *abb_borrar(abb_t *arbol, const char *clave){
-    if(arbol->raiz == NULL){
-        return NULL;
-    }
-    nodo_t* busqueda = abb_obtener(arbol,clave);
-    if(busqueda == NULL){
-        return NULL;
-    }
-    void* dato_devolver = busqueda->valor;
-    if(busqueda->hijo_der && busqueda->hijo_izq){
-        borrar_completo(arbol, busqueda);
-    }else if (busqueda->hijo_der || !busqueda->hijo_izq){
-        borrar_con_hijo(arbol, busqueda);
-    }else{
-        borrar_sin_hijos(arbol, busqueda);
-    }
-    arbol->cantidad -= 1;
-    return dato_devolver;
-}
+void borrar_completo(nodo_t* borrado, abb_t* arbol){
+    nodo_t* reemplazante = buscar_reemplazo(borrado->derecho);
 
-void borrar_completo(nodo_t* borrado){
-    nodo_t* padre = encontrar_padre(borrado,borrado->clave,NULL);
-    // TODO: encontrar el reemplazante mas izquierdo de los derechos
+    char* clave_reemplazo = strdup(reemplazante->clave);
+    void* valor_reemplazo = reemplazante->valor;
+    abb_borrar(arbol,clave_reemplazo);
+    free(borrado->clave);
+    borrado->clave = clave_reemplazo;
+    borrado->valor = valor_reemplazo;
 }
 
 
@@ -235,4 +242,34 @@ bool borrar_sin_hijos(abb_t* arbol; nodo_t* borrado){
     }else{
         padre->hijo_izq = NULL;
     }
+    free(borrado->clave);
+    free(borrado);
+    return true;
+}
+
+
+void *abb_borrar(abb_t *arbol, const char *clave){
+    if(arbol->raiz == NULL){
+        return NULL;
+    }
+    nodo_t* busqueda = abb_obtener(arbol,clave);
+    if(busqueda == NULL){
+        return NULL;
+    }
+    void* dato_devolver = busqueda->valor;
+    if(busqueda->hijo_der && busqueda->hijo_izq){
+        borrar_completo(arbol, busqueda);
+    }else if (busqueda->hijo_der || !busqueda->hijo_izq){
+        borrar_con_hijo(arbol, busqueda);
+    }else{
+        borrar_sin_hijos(arbol, busqueda);
+    }
+    arbol->cantidad -= 1;
+    return dato_devolver;
+}
+
+
+void abb_destruir(abb_t *arbol){
+    destruccion_rec(arbol->raiz,arbol->destruir_dato);
+    free(arbol);
 }
