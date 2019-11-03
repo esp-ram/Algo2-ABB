@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
+
 typedef struct abb abb_t;
 
 typedef int (*abb_comparar_clave_t) (const char *, const char *);
