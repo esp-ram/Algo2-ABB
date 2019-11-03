@@ -75,7 +75,7 @@ nodo_t* nodo_crear(const char*clave, void* valor){
 
 nodo_t* devuelve_nodo(const abb_t *arbol, const char *clave){
     nodo_t* resultado = comparacion_rec(arbol->raiz,clave,NULL,arbol);
-    if (resultado != NULL && arbol->comparar_clave(resultado,clave) == 0){
+    if (resultado != NULL && arbol->comparar_clave(resultado->clave,clave) == 0){
         return resultado;
     }
     return NULL;
@@ -192,7 +192,8 @@ void *abb_obtener(const abb_t *arbol, const char *clave){
 
 void borrar_completo(nodo_t* borrado, abb_t* arbol){
     nodo_t* reemplazante = buscar_reemplazo(borrado->hijo_der);
-    char* clave_reemplazo = strdup(reemplazante->clave);
+    char* clave_reemplazo = malloc(strlen(reemplazante->clave)+1 * sizeof(char));
+    strcpy(clave_reemplazo,reemplazante->clave);
     void* valor_reemplazo = reemplazante->valor;
     abb_borrar(arbol,clave_reemplazo);
     free(borrado->clave);
