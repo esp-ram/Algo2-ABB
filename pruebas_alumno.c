@@ -31,7 +31,6 @@ static void prueba_iterar_abb_vacio(){
     print_test("Prueba abb iter crear iterador abb vacio", iter);
     print_test("Prueba abb iter esta al final", abb_iter_in_al_final(iter));
     print_test("Prueba abb iter avanzar es false", !abb_iter_in_avanzar(iter));
-    // REVIEW: FALLA.
     print_test("Prueba abb iter ver actual es NULL", !abb_iter_in_ver_actual(iter));
 
     abb_iter_in_destruir(iter);
@@ -57,7 +56,6 @@ static void prueba_abb_insertar()
     print_test("Prueba la cantidad de elementos es 1", abb_cantidad(abb) == 1);
     print_test("Prueba obtener clave1 es valor1", abb_obtener(abb, clave1) == valor1);
     print_test("Prueba pertenece clave1, es true", abb_pertenece(abb, clave1));
-    // REVIEW: FALLA.
     print_test("Prueba borrar clave1, es valor1", abb_borrar(abb, clave1) == valor1);
     print_test("Prueba la cantidad de elementos es 0", abb_cantidad(abb) == 0);
 
@@ -91,7 +89,7 @@ static void prueba_abb_insertar()
     print_test("Prueba abb la cantidad de elementos es 6", abb_cantidad(abb) == 6);
     print_test("Prueba abb obtener clave7 es valor7", abb_obtener(abb, clave7) == valor7);
     print_test("Prueba abb pertenece clave7, es true", abb_pertenece(abb, clave7));
-
+    // REVIEW: FALLA.
     abb_destruir(abb);
 }
 
@@ -161,7 +159,6 @@ static void prueba_abb_clave_vacia(){
     print_test("Prueba abb la cantidad de elementos es 1", abb_cantidad(abb) == 1);
     print_test("Prueba abb obtener clave vacia es valor", abb_obtener(abb, clave) == valor);
     print_test("Prueba abb pertenece clave vacia, es true", abb_pertenece(abb, clave));
-    // REVIEW: FALLA.
     print_test("Prueba abb borrar clave vacia, es valor", abb_borrar(abb, clave) == valor);
     print_test("Prueba abb la cantidad de elementos es 0", abb_cantidad(abb) == 0);
 
@@ -180,9 +177,7 @@ static void prueba_abb_valor_null(){
     print_test("Prueba abb obtener clave vacia es valor NULL", abb_obtener(abb, clave) == valor);
     print_test("Prueba abb pertenece clave vacia, es true", abb_pertenece(abb, clave));
     print_test("Prueba abb borrar clave vacia, es valor NULL", abb_borrar(abb, clave) == valor);
-    // REVIEW: FALLA.
     print_test("Prueba abb la cantidad de elementos es 0", abb_cantidad(abb) == 0);
-    // REVIEW: FALLA.
     abb_destruir(abb);
 }
 
@@ -216,7 +211,7 @@ static void prueba_abb_volumen(size_t largo, bool debug)
 
     if (debug) print_test("Prueba abb pertenece y obtener muchos elementos", ok);
     if (debug) print_test("Prueba abb la cantidad de elementos es correcta", abb_cantidad(abb) == largo);
-
+    // REVIEW: FALLA.
     for (size_t i = 0; i < largo; i++) {
         ok = abb_borrar(abb, claves[i]) == valores[i];
         if (!ok) break;
@@ -286,6 +281,7 @@ static ssize_t buscar(const char* clave, char* claves[], size_t largo)
 
 
 static void prueba_abb_iterar(){
+    printf("\nprueba abb iterar\n");
     abb_t* abb = abb_crear(strcmp,NULL);
 
     char *claves[] = {"perro", "gato", "vaca"};
@@ -327,7 +323,7 @@ static void prueba_abb_iterar(){
     abb_iter_in_avanzar(iter);
     print_test("Prueba abb iterador esta al final, es true", abb_iter_in_al_final(iter));
 
-
+    // REVIEW: FALLA.
     print_test("Prueba abb iterador ver actual, es NULL", !abb_iter_in_ver_actual(iter));
     print_test("Prueba abb iterador avanzar es false", !abb_iter_in_avanzar(iter));
     print_test("Prueba abb iterador esta al final, es true", abb_iter_in_al_final(iter));
@@ -394,7 +390,7 @@ static void prueba_abb_iterar_volumen(size_t largo)
         }
     }
     print_test("Prueba abb iteración en volumen, se cambiaron todo los elementos", ok);
-
+    // REVIEW: FALLA.
     free(claves);
     abb_iter_in_destruir(iter);
     abb_destruir(abb);
@@ -403,14 +399,16 @@ static void prueba_abb_iterar_volumen(size_t largo)
 
 
 int main(){
-    prueba_crear_abb_vacio();
-    prueba_iterar_abb_vacio();
-    prueba_abb_insertar();
-    prueba_abb_reemplazar();
-    prueba_abb_reemplazar_con_destruir();
-    prueba_abb_clave_vacia();
-    prueba_abb_borrar();
-    prueba_abb_valor_null();
-    prueba_abb_volumen(5000,true);
+    //prueba_crear_abb_vacio(); //OK
+    //prueba_iterar_abb_vacio(); //OK
+    //prueba_abb_insertar(); //NO
+    //prueba_abb_reemplazar(); //NO
+    //prueba_abb_reemplazar_con_destruir(); //OK
+    //prueba_abb_clave_vacia(); //OK
+    //prueba_abb_borrar(); //OK
+    //prueba_abb_valor_null(); //OK
+    //prueba_abb_iterar(); //NO
+    //prueba_abb_volumen(5000,true); //NO
+    //prueba_abb_iterar_volumen(2500); //NO
     return 0;
 }

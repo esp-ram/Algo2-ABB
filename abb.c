@@ -42,7 +42,7 @@ nodo_t* comparacion_rec(nodo_t* inicial, const char* nuevo, nodo_t* anterior, co
     if (resultado == 0){
         //existe un nodo con la misma clave.
         return inicial;
-    }else if(resultado < 0){
+    }else if(resultado > 0){
         //se mueve a la izquierda
         return comparacion_rec(inicial->hijo_izq,nuevo,inicial,arbol);
     }else{
@@ -82,11 +82,11 @@ nodo_t* devuelve_nodo(const abb_t *arbol, const char *clave){
 }
 
 
-nodo_t* encontrar_padre(nodo_t* inicial, const char* clave, nodo_t* padre, abb_t* arbol){
+nodo_t* encontrar_padre(nodo_t* inicial, char* clave, nodo_t* padre, abb_t* arbol){
     int resultado = arbol->comparar_clave(inicial->clave,clave);
     if (resultado == 0){
         return padre;
-    }else if(resultado < 0){
+    }else if(resultado > 0){
         return encontrar_padre(inicial->hijo_izq,clave,inicial,arbol);
     }else{
         return encontrar_padre(inicial->hijo_der,clave,inicial,arbol);
@@ -106,13 +106,21 @@ nodo_t* buscar_reemplazo(nodo_t* nodo){
 
 
 bool destruccion_rec(nodo_t* nodo, void destr_dato(void*)){
-    if(!nodo){
+    printf("entra en destruccion_rec\n");
+    if(nodo == NULL){
+        printf("es null el nodo\n");
         return NULL;
     }
-    destruccion_rec(nodo->hijo_der,destr_dato);
+    printf("no es null el nodo\n");
+    printf("entra hijo izq\n");
     destruccion_rec(nodo->hijo_izq,destr_dato);
+    printf("entra hijo der\n");
+    destruccion_rec(nodo->hijo_der,destr_dato);
+    printf("borra clave\n");
     free(nodo->clave);
+    printf("destruye dato\n");
     destr_dato(nodo->valor);
+    printf("libera nodo\n");
     free(nodo);
     return true;
 }
@@ -135,8 +143,7 @@ abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
 
 
 bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
-    nodo_t* padre = comparacion_rec(arbol->raiz,clave,NULL,arbol);
-    if(padre == NULL){
+    if((arbol->raiz) == NULL){
         nodo_t* nodo_nuevo = nodo_crear(clave,dato);
         if(nodo_nuevo == NULL){
             return false;
@@ -145,6 +152,7 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
         arbol->cantidad += 1;
         return true;
     }
+        nodo_t* padre = comparacion_rec(arbol->raiz,clave,NULL,arbol);
     int comparacion_padre = arbol->comparar_clave(padre->clave,clave);
     if (comparacion_padre == 0){
         void* auxiliar = padre->valor;
@@ -157,7 +165,7 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
         if(nodo_nuevo == NULL){
             return false;
         }
-        if (comparacion_padre < 1) {
+        if (comparacion_padre > 0) {
             padre->hijo_izq = nodo_nuevo;
         } else {
             padre->hijo_der = nodo_nuevo;
@@ -193,6 +201,7 @@ void *abb_obtener(const abb_t *arbol, const char *clave){
 void borrar_completo(nodo_t* borrado, abb_t* arbol){
     nodo_t* reemplazante = buscar_reemplazo(borrado->hijo_der);
     char* clave_reemplazo = malloc(strlen(reemplazante->clave)+1 * sizeof(char));
+    // TODO: revisar si malloc es correcto
     strcpy(clave_reemplazo,reemplazante->clave);
     void* valor_reemplazo = reemplazante->valor;
     abb_borrar(arbol,clave_reemplazo);
@@ -238,7 +247,7 @@ bool borrar_con_hijo(abb_t* arbol, nodo_t* borrado){
 
 
 bool borrar_sin_hijos(abb_t* arbol, nodo_t* borrado){
-    nodo_t* padre = encontrar_padre(borrado,borrado->clave,NULL,arbol);
+    nodo_t* padre = encontrar_padre(arbol->raiz,borrado->clave,NULL,arbol);
     if(padre == NULL){// es raiz
         arbol->raiz = NULL;
         return true;
@@ -264,14 +273,17 @@ void *abb_borrar(abb_t *arbol, const char *clave){
     if(arbol->raiz == NULL){
         return NULL;
     }
-    nodo_t* busqueda = abb_obtener(arbol,clave);
+    printf("entra a busqueda\n");
+    nodo_t* busqueda = devuelve_nodo(arbol,clave);
+    printf("sale de busqueda\n");
     if(busqueda == NULL){
         return NULL;
     }
+    printf("encuentra nodo\n");
     void* dato_devolver = busqueda->valor;
-    if(busqueda->hijo_der && busqueda->hijo_izq){
+    if((busqueda->hijo_izq != NULL) && (busqueda->hijo_der != NULL)){
         borrar_completo(busqueda, arbol);
-    }else if (busqueda->hijo_der || !busqueda->hijo_izq){
+    }else if ((busqueda->hijo_izq != NULL)|| (busqueda->hijo_der != NULL)){
         borrar_con_hijo(arbol, busqueda);
     }else{
         borrar_sin_hijos(arbol, busqueda);
@@ -283,6 +295,7 @@ void *abb_borrar(abb_t *arbol, const char *clave){
 
 void abb_destruir(abb_t *arbol){
     destruccion_rec(arbol->raiz,arbol->destruir_dato);
+    printf("sale de destruccion rec\n");
     free(arbol);
 }
 
@@ -328,6 +341,9 @@ bool abb_iter_in_avanzar(abb_iter_t *iter){
 
 
 const char *abb_iter_in_ver_actual(const abb_iter_t *iter){
+    if(abb_iter_in_al_final(iter)){
+        return NULL;
+    }
     return (((nodo_t*)(pila_ver_tope(iter->pila)))->clave);
 }
 
