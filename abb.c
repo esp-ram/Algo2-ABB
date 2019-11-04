@@ -106,21 +106,15 @@ nodo_t* buscar_reemplazo(nodo_t* nodo){
 
 
 bool destruccion_rec(nodo_t* nodo, void destr_dato(void*)){
-    printf("entra en destruccion_rec\n");
-    if(nodo == NULL){
-        printf("es null el nodo\n");
-        return NULL;
+    if(!nodo){
+        return false;
     }
-    printf("no es null el nodo\n");
-    printf("entra hijo izq\n");
     destruccion_rec(nodo->hijo_izq,destr_dato);
-    printf("entra hijo der\n");
     destruccion_rec(nodo->hijo_der,destr_dato);
-    printf("borra clave\n");
     free(nodo->clave);
-    printf("destruye dato\n");
-    destr_dato(nodo->valor);
-    printf("libera nodo\n");
+    if(destr_dato){
+        destr_dato(nodo->valor);
+    }
     free(nodo);
     return true;
 }
@@ -152,7 +146,7 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
         arbol->cantidad += 1;
         return true;
     }
-        nodo_t* padre = comparacion_rec(arbol->raiz,clave,NULL,arbol);
+    nodo_t* padre = comparacion_rec(arbol->raiz,clave,NULL,arbol);
     int comparacion_padre = arbol->comparar_clave(padre->clave,clave);
     if (comparacion_padre == 0){
         void* auxiliar = padre->valor;
@@ -273,13 +267,10 @@ void *abb_borrar(abb_t *arbol, const char *clave){
     if(arbol->raiz == NULL){
         return NULL;
     }
-    printf("entra a busqueda\n");
     nodo_t* busqueda = devuelve_nodo(arbol,clave);
-    printf("sale de busqueda\n");
     if(busqueda == NULL){
         return NULL;
     }
-    printf("encuentra nodo\n");
     void* dato_devolver = busqueda->valor;
     if((busqueda->hijo_izq != NULL) && (busqueda->hijo_der != NULL)){
         borrar_completo(busqueda, arbol);
@@ -295,7 +286,6 @@ void *abb_borrar(abb_t *arbol, const char *clave){
 
 void abb_destruir(abb_t *arbol){
     destruccion_rec(arbol->raiz,arbol->destruir_dato);
-    printf("sale de destruccion rec\n");
     free(arbol);
 }
 
@@ -356,4 +346,29 @@ bool abb_iter_in_al_final(const abb_iter_t *iter){
 void abb_iter_in_destruir(abb_iter_t* iter){
     pila_destruir(iter->pila);
     free(iter);
+}
+
+
+
+bool aux_iter_i(nodo_t* nodo, abb_t* arbol, bool visitar(const char *, void *, void *), void *extra){
+    if(nodo == NULL){
+        return false;
+    }
+
+    if (aux_iter_i(nodo->hijo_izq,arbol,visitar,extra) == false){
+        return false;
+    }
+    if (visitar(nodo->clave,nodo->valor,extra) == false){
+        return false;
+    }
+    if (aux_iter_i(nodo->hijo_der,arbol,visitar,extra)== false){
+        return false;
+    }
+
+    return true;
+}
+
+
+void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra){
+
 }

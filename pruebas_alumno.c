@@ -46,10 +46,10 @@ static void prueba_abb_insertar()
     char *clave1 = "perro", *valor1 = "guau";
     char *clave2 = "gato", *valor2 = "miau";
     char *clave3 = "vaca", *valor3 = "mu";
-    char *clave4 = "TEST4", *valor4 = "test4";
-    char *clave5 = "TEST5", *valor5 = "test5";
-    char *clave6 = "TEST6", *valor6 = "test6";
-    char *clave7 = "TEST7", *valor7 = "test7";
+    char *clave4 = "testa", *valor4 = "test4";
+    char *clave5 = "testb", *valor5 = "test5";
+    char *clave6 = "testc", *valor6 = "test6";
+    char *clave7 = "testd", *valor7 = "test7";
 
 
     print_test("Prueba insertar clave1", abb_guardar(abb, clave1, valor1));
@@ -89,7 +89,8 @@ static void prueba_abb_insertar()
     print_test("Prueba abb la cantidad de elementos es 6", abb_cantidad(abb) == 6);
     print_test("Prueba abb obtener clave7 es valor7", abb_obtener(abb, clave7) == valor7);
     print_test("Prueba abb pertenece clave7, es true", abb_pertenece(abb, clave7));
-    // REVIEW: FALLA.
+
+
     abb_destruir(abb);
 }
 
@@ -114,7 +115,7 @@ static void prueba_abb_reemplazar()
     print_test("Prueba abb insertar clave2 con otro valor", abb_guardar(abb, clave2, valor2b));
     print_test("Prueba abb obtener clave2 es valor2b", abb_obtener(abb, clave2) == valor2b);
     print_test("Prueba abb la cantidad de elementos es 2", abb_cantidad(abb) == 2);
-    // REVIEW: FALLA.
+
     abb_destruir(abb);
 }
 
@@ -323,7 +324,7 @@ static void prueba_abb_iterar(){
     abb_iter_in_avanzar(iter);
     print_test("Prueba abb iterador esta al final, es true", abb_iter_in_al_final(iter));
 
-    // REVIEW: FALLA.
+
     print_test("Prueba abb iterador ver actual, es NULL", !abb_iter_in_ver_actual(iter));
     print_test("Prueba abb iterador avanzar es false", !abb_iter_in_avanzar(iter));
     print_test("Prueba abb iterador esta al final, es true", abb_iter_in_al_final(iter));
@@ -390,25 +391,24 @@ static void prueba_abb_iterar_volumen(size_t largo)
         }
     }
     print_test("Prueba abb iteración en volumen, se cambiaron todo los elementos", ok);
-    // REVIEW: FALLA.
     free(claves);
     abb_iter_in_destruir(iter);
     abb_destruir(abb);
 }
 
-
-
+/*
 int main(){
     //prueba_crear_abb_vacio(); //OK
     //prueba_iterar_abb_vacio(); //OK
-    //prueba_abb_insertar(); //NO
-    //prueba_abb_reemplazar(); //NO
+    //prueba_abb_insertar(); //OK
+    //prueba_abb_reemplazar(); //OK
     //prueba_abb_reemplazar_con_destruir(); //OK
     //prueba_abb_clave_vacia(); //OK
     //prueba_abb_borrar(); //OK
     //prueba_abb_valor_null(); //OK
-    //prueba_abb_iterar(); //NO
+    //prueba_abb_iterar(); //OK
     //prueba_abb_volumen(5000,true); //NO
-    //prueba_abb_iterar_volumen(2500); //NO
+    //prueba_abb_iterar_volumen(2500); //OK
     return 0;
 }
+*/
