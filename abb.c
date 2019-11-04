@@ -175,14 +175,6 @@ size_t abb_cantidad(abb_t *arbol){
 }
 
 
-bool abb_pertenece(const abb_t *arbol, const char *clave){
-    if(devuelve_nodo(arbol,clave)){
-        return true;
-    }
-    return false;
-}
-
-
 void *abb_obtener(const abb_t *arbol, const char *clave){
     nodo_t* obtenido = devuelve_nodo(arbol,clave);
     if(obtenido != NULL){
@@ -192,13 +184,19 @@ void *abb_obtener(const abb_t *arbol, const char *clave){
 }
 
 
+bool abb_pertenece(const abb_t *arbol, const char *clave){
+    if(devuelve_nodo(arbol,clave) != NULL){
+        return true;
+    }
+    return false;
+}
+
 void borrar_completo(nodo_t* borrado, abb_t* arbol){
     nodo_t* reemplazante = buscar_reemplazo(borrado->hijo_der);
     char* clave_reemplazo = malloc(strlen(reemplazante->clave)+1 * sizeof(char));
     // TODO: revisar si malloc es correcto
     strcpy(clave_reemplazo,reemplazante->clave);
-    void* valor_reemplazo = reemplazante->valor;
-    abb_borrar(arbol,clave_reemplazo);
+    void* valor_reemplazo = abb_borrar(arbol,clave_reemplazo);
     free(borrado->clave);
     borrado->clave = clave_reemplazo;
     borrado->valor = valor_reemplazo;
@@ -206,7 +204,7 @@ void borrar_completo(nodo_t* borrado, abb_t* arbol){
 
 
 bool borrar_con_hijo(abb_t* arbol, nodo_t* borrado){
-    nodo_t* padre = encontrar_padre(borrado,borrado->clave,NULL,arbol);
+    nodo_t* padre = encontrar_padre(arbol->raiz,borrado->clave,NULL,arbol);
     if(padre == NULL){// es raiz
         if(!borrado->hijo_izq){
             arbol->raiz = borrado->hijo_der;
@@ -215,20 +213,15 @@ bool borrar_con_hijo(abb_t* arbol, nodo_t* borrado){
         }
         return true;
     }
-    enum Tipo es_hijo;
-    if(arbol->comparar_clave(padre->clave,borrado->clave) < 0){
-        es_hijo = Derecho;
-    }else{
-        es_hijo = Izquierdo;
-    }
+    int es_hijo = arbol->comparar_clave(padre->clave,borrado->clave);
     if(!borrado->hijo_izq){
-        if (es_hijo == Derecho) {
+        if (es_hijo < 0) {
             padre->hijo_der = borrado->hijo_der;
         }else{
             padre->hijo_izq = borrado->hijo_der;
         }
     }else{
-        if (es_hijo == Derecho){
+        if (es_hijo < 0){
             padre->hijo_der = borrado->hijo_izq;
         }else{
             padre->hijo_izq = borrado->hijo_izq;
@@ -246,13 +239,8 @@ bool borrar_sin_hijos(abb_t* arbol, nodo_t* borrado){
         arbol->raiz = NULL;
         return true;
     }
-    enum Tipo es_hijo;
-    if(arbol->comparar_clave(padre->clave,borrado->clave) < 0){
-        es_hijo = Derecho;
-    }else{
-        es_hijo = Izquierdo;
-    }
-    if(es_hijo == Derecho){
+    int es_hijo = arbol->comparar_clave(padre->clave,borrado->clave);
+    if(es_hijo < 0){
         padre->hijo_der = NULL;
     }else{
         padre->hijo_izq = NULL;
@@ -352,7 +340,7 @@ void abb_iter_in_destruir(abb_iter_t* iter){
 
 bool aux_iter_i(nodo_t* nodo, abb_t* arbol, bool visitar(const char *, void *, void *), void *extra){
     if(nodo == NULL){
-        return false;
+        return true;
     }
 
     if (aux_iter_i(nodo->hijo_izq,arbol,visitar,extra) == false){
@@ -370,5 +358,5 @@ bool aux_iter_i(nodo_t* nodo, abb_t* arbol, bool visitar(const char *, void *, v
 
 
 void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra){
-
+    aux_iter_i(arbol->raiz,arbol,visitar,extra);
 }
