@@ -262,6 +262,7 @@ void *abb_borrar(abb_t *arbol, const char *clave){
     void* dato_devolver = busqueda->valor;
     if((busqueda->hijo_izq != NULL) && (busqueda->hijo_der != NULL)){
         borrar_completo(busqueda, arbol);
+        return dato_devolver;
     }else if ((busqueda->hijo_izq != NULL)|| (busqueda->hijo_der != NULL)){
         borrar_con_hijo(arbol, busqueda);
     }else{
