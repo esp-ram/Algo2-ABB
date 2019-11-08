@@ -500,7 +500,7 @@ void prueba_borrar_borde(){
 }
 
 
-int main(){
+void pruebas_abb_alumno(){
     prueba_crear_abb_vacio(); //OK
     prueba_iterar_abb_vacio(); //OK
     prueba_abb_insertar(); //OK
@@ -515,5 +515,4 @@ int main(){
     prueba_iterador_interno_total();
     prueba_iterador_interno_parcial();
     prueba_borrar_borde();
-    return 0;
 }
