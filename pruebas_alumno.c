@@ -7,6 +7,18 @@
 #include <unistd.h>  // For ssize_t in Linux.
 
 
+bool suma_total(const char* clave, void*dato,void* total){
+    *(int*)total += *(int*)dato;
+    return true;
+}
+
+bool duplicar_4_primeros(const char* clave, void* dato, void* extra){
+  if(*(int*)dato > 4){
+    return false;
+  }
+  *(int*)dato =*(int*)dato*2;
+  return true;
+}
 
 
 static void prueba_crear_abb_vacio()
@@ -396,19 +408,112 @@ static void prueba_abb_iterar_volumen(size_t largo)
     abb_destruir(abb);
 }
 
-/*
+
+void prueba_iterador_interno_total(){
+    printf("\nprueba abb iterador interno total\n");
+    abb_t* abb = abb_crear(strcmp, NULL);
+    char* claves [10] = {"h","c","f","b","d","g","i","a","e","k"};
+    int arr[10] ={6,8,20,3,71,93,1,0,100,212};
+    for(int i = 0; i < 10; i++){
+        abb_guardar(abb, claves[i], &arr[i]);
+    }
+    int suma = 0;
+    abb_in_order(abb, suma_total, &suma);
+    print_test("suma es 514", suma == 514);
+    abb_destruir(abb);
+}
+
+
+void prueba_iterador_interno_parcial(){
+    printf("\nprueba abb iterador interno parcial\n");
+    abb_t* abb = abb_crear(strcmp, NULL);
+    char* claves [10] = {"f","c","h","b","d","g","i","a","e","j"};
+    int arr[10] ={6,3,8,2,4,7,9,1,5,10};
+    for(int i = 0; i < 10; i++){
+        abb_guardar(abb, claves[i], &arr[i]);
+    }
+    abb_in_order(abb, duplicar_4_primeros, NULL);
+    bool resultado_correcto = true;
+    abb_iter_t* iter = abb_iter_in_crear(abb);
+    if(!iter){
+        abb_destruir(abb);
+        return;
+    }
+    int i = 0;
+    while(!abb_iter_in_al_final(iter)){
+        if(*(int*)abb_obtener(abb,abb_iter_in_ver_actual(iter)) != ((i+1)*2) && i < 4){
+            resultado_correcto = false;
+        }
+        if(i >= 4 && *(int*)abb_obtener(abb,abb_iter_in_ver_actual(iter)) != (i+1)){
+            resultado_correcto = false;
+        }
+        abb_iter_in_avanzar(iter);
+        i++;
+    }
+    print_test("ultimos 6 elementos sin modificar", resultado_correcto);
+    abb_iter_in_destruir(iter);
+    abb_destruir(abb);
+}
+
+
+void prueba_borrar_borde(){
+    printf("\nprueba abb borrar borde\n");
+    abb_t* abb = abb_crear(strcmp, NULL);
+	char *clave1 = "j", *valor1 = "valor 11";
+	char *clave2 = "c", *valor2 = "valor 22";
+	char *clave3 = "w", *valor3 = "valor 33";
+	char *clave4 = "f", *valor4 = "valor 44";
+	char *clave5 = "u", *valor5 = "valor 55";
+    char *clave6 = "z", *valor6 = "valor 66";
+    char *clave7 = "a", *valor7 = "valor 77";
+    char *clave8 = "r", *valor8 = "valor 88";
+
+
+	abb_guardar(abb, clave1, valor1);
+	abb_guardar(abb, clave2, valor2);
+  	abb_guardar(abb, clave3, valor3);
+    abb_guardar(abb, clave4, valor4);
+    abb_guardar(abb, clave5, valor5);
+	abb_guardar(abb, clave6, valor6);
+	abb_guardar(abb, clave7, valor7);
+	abb_guardar(abb, clave8, valor8);
+
+
+	print_test("Borrar U con 1 hijo", abb_borrar(abb, clave5) == valor5);
+	print_test("cantidad es 7",abb_cantidad(abb) == 7);
+	print_test("Prueba pertenece Z, es true", abb_pertenece(abb , clave6));
+	print_test("Prueba pertenece F, es true", abb_pertenece(abb , clave4));
+	print_test("Prueba pertenece R, es true", abb_pertenece(abb , clave8));
+	print_test("Borrar Z hoja", abb_borrar(abb, clave6) == valor6);
+    print_test("cantidad es 6",abb_cantidad(abb) == 6);
+	print_test("Prueba pertenece W, es true", abb_pertenece(abb , clave3));
+	print_test("Prueba pertenece R, es true", abb_pertenece(abb , clave8));
+	print_test("Prueba pertenece A, es true", abb_pertenece(abb , clave7));
+    print_test("Borrar J con 2 hijos y es raiz", abb_borrar(abb, clave1) == valor1);
+    print_test("cantidad es 5",abb_cantidad(abb) == 5);
+    print_test("Prueba pertenece W, es true", abb_pertenece(abb , clave3));
+    print_test("Prueba pertenece C, es true", abb_pertenece(abb , clave2));
+    print_test("Prueba pertenece F, es true", abb_pertenece(abb , clave4));
+
+    abb_destruir(abb);
+
+}
+
+
 int main(){
-    //prueba_crear_abb_vacio(); //OK
-    //prueba_iterar_abb_vacio(); //OK
-    //prueba_abb_insertar(); //OK
-    //prueba_abb_reemplazar(); //OK
-    //prueba_abb_reemplazar_con_destruir(); //OK
-    //prueba_abb_clave_vacia(); //OK
-    //prueba_abb_borrar(); //OK
-    //prueba_abb_valor_null(); //OK
-    //prueba_abb_iterar(); //OK
-    //prueba_abb_volumen(5000,true); //NO
-    //prueba_abb_iterar_volumen(2500); //OK
+    prueba_crear_abb_vacio(); //OK
+    prueba_iterar_abb_vacio(); //OK
+    prueba_abb_insertar(); //OK
+    prueba_abb_reemplazar(); //OK
+    prueba_abb_reemplazar_con_destruir(); //OK
+    prueba_abb_clave_vacia(); //OK
+    prueba_abb_borrar(); //OK
+    prueba_abb_valor_null(); //OK
+    prueba_abb_iterar(); //OK
+    prueba_abb_volumen(5000,true); //OK
+    prueba_abb_iterar_volumen(2500); //OK
+    prueba_iterador_interno_total();
+    prueba_iterador_interno_parcial();
+    prueba_borrar_borde();
     return 0;
 }
-*/
