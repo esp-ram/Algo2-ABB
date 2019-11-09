@@ -188,6 +188,7 @@ bool abb_pertenece(const abb_t *arbol, const char *clave){
     return false;
 }
 
+
 void borrar_completo(nodo_t* borrado, abb_t* arbol){
     nodo_t* reemplazante = buscar_reemplazo(borrado->hijo_der);
     char* clave_reemplazo = malloc(strlen(reemplazante->clave)+1 * sizeof(char));
@@ -300,7 +301,6 @@ abb_iter_t *abb_iter_in_crear(const abb_t *arbol){
         pila_apilar(nuevo_iter->pila,apilado);
         apilado = apilado->hijo_izq;
     }
-
     return nuevo_iter;
 }
 
@@ -340,12 +340,10 @@ void abb_iter_in_destruir(abb_iter_t* iter){
 }
 
 
-
 bool aux_iter_i(nodo_t* nodo, abb_t* arbol, bool visitar(const char *, void *, void *), void *extra){
     if(nodo == NULL){
         return true;
     }
-
     if (aux_iter_i(nodo->hijo_izq,arbol,visitar,extra) == false){
         return false;
     }
@@ -355,7 +353,6 @@ bool aux_iter_i(nodo_t* nodo, abb_t* arbol, bool visitar(const char *, void *, v
     if (aux_iter_i(nodo->hijo_der,arbol,visitar,extra)== false){
         return false;
     }
-
     return true;
 }
 
