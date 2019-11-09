@@ -40,13 +40,10 @@ nodo_t* comparacion_rec(nodo_t* inicial, const char* nuevo, nodo_t* anterior, co
     }
     int resultado = arbol->comparar_clave(inicial->clave,nuevo);
     if (resultado == 0){
-        //existe un nodo con la misma clave.
         return inicial;
     }else if(resultado > 0){
-        //se mueve a la izquierda
         return comparacion_rec(inicial->hijo_izq,nuevo,inicial,arbol);
     }else{
-        //se mueve a la derecha
         return comparacion_rec(inicial->hijo_der,nuevo,inicial,arbol);
     }
 }
@@ -58,15 +55,15 @@ nodo_t* nodo_crear(const char*clave, void* valor){
         return NULL;
     }
 
-    char* copiar_clave = calloc(strlen(clave)+1,sizeof(char));
-    if (copiar_clave == NULL){
+    char* copiar_clave = malloc(strlen(clave)+1 * sizeof(char));
+    if(copiar_clave == NULL){
         free(nodo_nuevo);
         return NULL;
     }
 
     strcpy(copiar_clave,clave);
-    nodo_nuevo->valor = valor;
     nodo_nuevo->clave = copiar_clave;
+    nodo_nuevo->valor = valor;
     nodo_nuevo->hijo_izq = NULL;
     nodo_nuevo->hijo_der = NULL;
     return nodo_nuevo;
@@ -105,9 +102,9 @@ nodo_t* buscar_reemplazo(nodo_t* nodo){
 }
 
 
-bool destruccion_rec(nodo_t* nodo, void destr_dato(void*)){
+void destruccion_rec(nodo_t* nodo, void destr_dato(void*)){
     if(!nodo){
-        return false;
+        return;
     }
     destruccion_rec(nodo->hijo_izq,destr_dato);
     destruccion_rec(nodo->hijo_der,destr_dato);
@@ -116,8 +113,8 @@ bool destruccion_rec(nodo_t* nodo, void destr_dato(void*)){
         destr_dato(nodo->valor);
     }
     free(nodo);
-    return true;
 }
+
 ////////////////PRIMITIVAS
 
 abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
@@ -194,7 +191,9 @@ bool abb_pertenece(const abb_t *arbol, const char *clave){
 void borrar_completo(nodo_t* borrado, abb_t* arbol){
     nodo_t* reemplazante = buscar_reemplazo(borrado->hijo_der);
     char* clave_reemplazo = malloc(strlen(reemplazante->clave)+1 * sizeof(char));
-    // TODO: revisar si malloc es correcto
+    if (clave_reemplazo == NULL){
+        return;
+    }
     strcpy(clave_reemplazo,reemplazante->clave);
     void* valor_reemplazo = abb_borrar(arbol,clave_reemplazo);
     free(borrado->clave);
@@ -211,6 +210,8 @@ bool borrar_con_hijo(abb_t* arbol, nodo_t* borrado){
         }else{
             arbol->raiz = borrado->hijo_izq;
         }
+        free(borrado->clave);
+        free(borrado);
         return true;
     }
     int es_hijo = arbol->comparar_clave(padre->clave,borrado->clave);
@@ -237,6 +238,8 @@ bool borrar_sin_hijos(abb_t* arbol, nodo_t* borrado){
     nodo_t* padre = encontrar_padre(arbol->raiz,borrado->clave,NULL,arbol);
     if(padre == NULL){// es raiz
         arbol->raiz = NULL;
+        free(borrado->clave);
+        free(borrado);
         return true;
     }
     int es_hijo = arbol->comparar_clave(padre->clave,borrado->clave);
@@ -262,6 +265,7 @@ void *abb_borrar(abb_t *arbol, const char *clave){
     void* dato_devolver = busqueda->valor;
     if((busqueda->hijo_izq != NULL) && (busqueda->hijo_der != NULL)){
         borrar_completo(busqueda, arbol);
+        // TODO: revisar return de borrar_completo
         return dato_devolver;
     }else if ((busqueda->hijo_izq != NULL)|| (busqueda->hijo_der != NULL)){
         borrar_con_hijo(arbol, busqueda);
@@ -291,7 +295,6 @@ abb_iter_t *abb_iter_in_crear(const abb_t *arbol){
     }
     nuevo_iter->arbol = arbol;
     nuevo_iter->pila = nueva_pila;
-    //apilar todos los izquierdos
     nodo_t* apilado = arbol->raiz;
     while(apilado){
         pila_apilar(nuevo_iter->pila,apilado);
@@ -306,7 +309,6 @@ bool abb_iter_in_avanzar(abb_iter_t *iter){
     if (abb_iter_in_al_final(iter)){
         return false;
     }
-    //si tiene derecho -> apilarlo y todos los izquierdos
     nodo_t* nodo1 = pila_desapilar(iter->pila);
     if (nodo1->hijo_der){
         nodo_t* apilado = nodo1->hijo_der;
